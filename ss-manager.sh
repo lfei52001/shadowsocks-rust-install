@@ -10,14 +10,13 @@ CONFIG_DIR="/etc/shadowsocks-rust"
 CONFIG_FILE="$CONFIG_DIR/config.json"
 SERVICE_NAME="shadowsocks-rust"
 DEFAULT_PORT=443
-METHOD="2022-blake3-aes-256-gcm"
+DEFAULT_METHOD="2022-blake3-aes-256-gcm"
 # ===============================================
 
 clear
 echo ""
 echo "========================================"
 echo "  shadowsocks-rust 管理脚本 (x86_64)"
-echo "  加密方式: $METHOD"
 echo "  默认端口: $DEFAULT_PORT"
 echo "========================================"
 echo ""
@@ -41,6 +40,38 @@ fi
 function install_ss_rust() {
   echo ""
   echo "[安装 shadowsocks-rust]"
+
+  # 选择加密方式
+  echo ""
+  echo "请选择加密方式（主流选项）："
+  echo "  1. 2022-blake3-aes-256-gcm (推荐，高安全性)"
+  echo "  2. 2022-blake3-aes-128-gcm (速度更快)"
+  echo "  3. 2022-blake3-chacha20-poly1305 (兼容性好)"
+  echo "  4. aes-256-gcm (主流经典)"
+  echo "  5. chacha20-ietf-poly1305 (速度优先)"
+  echo "  6. aes-128-gcm (极致速度)"
+  echo "  其他: 输入自定义加密方式"
+  echo -n "请输入选项 (1-6 或自定义): "
+  read -r method_choice
+
+  case $method_choice in
+    1) METHOD="2022-blake3-aes-256-gcm" ;;
+    2) METHOD="2022-blake3-aes-128-gcm" ;;
+    3) METHOD="2022-blake3-chacha20-poly1305" ;;
+    4) METHOD="aes-256-gcm" ;;
+    5) METHOD="chacha20-ietf-poly1305" ;;
+    6) METHOD="aes-128-gcm" ;;
+    *)
+      echo -n "请输入自定义加密方式 (e.g., aes-192-gcm): "
+      read -r METHOD
+      if [ -z "$METHOD" ]; then
+        echo "错误：加密方式不能为空，使用默认 $DEFAULT_METHOD"
+        METHOD=$DEFAULT_METHOD
+      fi
+      ;;
+  esac
+
+  echo "选定的加密方式: $METHOD"
 
   # 让用户输入端口
   echo -n "请输入监听端口 (推荐 443，范围 1025-65535，默认 $DEFAULT_PORT): "
